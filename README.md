@@ -3,6 +3,7 @@ Trabalho do Allegro e os KRL PORRAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 
 
 Douglas Wink:
+
 ° Ajustei a pasta do jogo, para ficar mais facil de modificar, defini cada coisa em seu respectivo file. assim fica mais facil e rapido de ajustar eles quando quiser mudar algo. ( de uma olhada e veja como ficou o jogo )
 
 ° Criei os Inimigos
