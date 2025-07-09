@@ -1,23 +1,36 @@
-#include <allegro5/allegro.h>
 #include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_image.h>
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_ttf.h>
 #include <math.h>
+#include <stdbool.h>
 
-// --- Configurações Globais ---
+// --- Configuraï¿½ï¿½es Globais ---
 #define LARGURA_TELA 800
 #define ALTURA_TELA 600
-#define FPS 90.0f         			// O 'f' é um float literal
+#define FPS 90.0f         			// O 'f' ï¿½ um float literal
 
-// --- Dimensões do Mapa ---
+// --- Dimensï¿½es do Mapa ---
 #define LARGURA_MAPA (LARGURA_TELA * 3)
 #define ALTURA_MAPA (ALTURA_TELA * 3)
 
-// --- Margens da Câmera (Dead Zone) ---
+// --- Margens da Cï¿½mera (Dead Zone) ---
 #define CAMERA_MARGIN_X (LARGURA_TELA / 4.0f)
 #define CAMERA_MARGIN_Y (ALTURA_TELA / 4.0f)
 
+#define NUM_OBSTACULOS 3
+typedef struct
+{
+ float x,y;
+ float caixalargura,caixaaltura;
+}OBSTACLE;
+
+OBSTACLE obstaculos[NUM_OBSTACULOS] =
+{
+    {400, 400, 100, 100},
+    {200, 200, 50, 150},
+    {700, 100, 120, 80}
+};
                                             // --- ENUM PARA RASTREAR TECLAS PRESSIONADAS ---
 enum KEYS {
     KEY_W, KEY_A, KEY_S, KEY_D, 		    // WASD
@@ -25,10 +38,16 @@ enum KEYS {
     NUM_KEYS
 };
 bool keys[NUM_KEYS] = {false};  		// ARRYA PARA RASTREAR O ESTADO DAS TECLAS
+                                        // --- FUNï¿½ï¿½O PRINCIPAL DO JOGO ---
 
-                                        // --- FUNÇÃO PRINCIPAL DO JOGO ---
-int main() {
-                                        // INICIA O ALLEGRO
+bool colisao(float x1, float y1, float w1, float h1,float x2, float y2, float w2, float h2)
+{
+    return !(x1 + w1 < x2 || x1 > x2 + w2 || y1 + h1 < y2 || y1 > y2 + h2);
+}
+
+int main()
+{
+                                         // INICIA O ALLEGRO
     if (!al_init()) {
         return -1;
     }
@@ -76,15 +95,15 @@ int main() {
     float light_length = 150.0f;
     float light_angle_spread = ALLEGRO_PI / 4.0f;
 
-    float mouse_x = LARGURA_TELA / 2.0f; 	// MOUSE NA TELA(POSIÇÃO)
+    float mouse_x = LARGURA_TELA / 2.0f; 	// MOUSE NA TELA(POSIï¿½ï¿½O)
     float mouse_y = ALTURA_TELA / 2.0f;
 
                                         // --- VARIAVEIS DA CAMERA ---
-    // COMEÇAR COM O JOGADOR MAIS CENTRADO
+    // COMEï¿½AR COM O JOGADOR MAIS CENTRADO
     float camera_x = player_x - LARGURA_TELA / 2.0f + 16;
     float camera_y = player_y - ALTURA_TELA / 2.0f + 16;
 
-    // CAMERA FIQUE NO LIMITE DO MAPA E NÃO FUJA
+    // CAMERA FIQUE NO LIMITE DO MAPA E Nï¿½O FUJA
     if (camera_x < 0) camera_x = 0;
     if (camera_x > LARGURA_MAPA - LARGURA_TELA) camera_x = (float)(LARGURA_MAPA - LARGURA_TELA);
     if (camera_y < 0) camera_y = 0;
@@ -127,21 +146,21 @@ int main() {
         }
 
         if (redraw && al_is_event_queue_empty(event_queue)) {
-            // FUNCIONAMENTO DA MOVIMENTAÇÃO (PELAS COORDENADAS)
+            // FUNCIONAMENTO DA MOVIMENTAï¿½ï¿½O (PELAS COORDENADAS)
             if (keys[KEY_W] || keys[KEY_UP]) { player_y -= player_speed; }
             if (keys[KEY_S] || keys[KEY_DOWN]) { player_y += player_speed; }
             if (keys[KEY_A] || keys[KEY_LEFT]) { player_x -= player_speed; }
             if (keys[KEY_D] || keys[KEY_RIGHT]) { player_x += player_speed; }
 
-            // PERSONAGEM NÃO CAIR DA TERRA PLANA
+            // PERSONAGEM Nï¿½O CAIR DA TERRA PLANA
             if (player_x < 0) player_x = 0;
             if (player_x > LARGURA_MAPA - 32) player_x = (float)(LARGURA_MAPA - 32);
             if (player_y < 0) player_y = 0;
             if (player_y > ALTURA_MAPA - 32) player_y = (float)(ALTURA_MAPA - 32);
 
-            // --- ATUALIZAÇÃO DA DEAD ZONE(CAMERA) ---
-            float player_screen_x = player_x - camera_x + 16; // Posição X do centro da bola na tela
-            float player_screen_y = player_y - camera_y + 16; // Posição Y do centro da bola na tela
+            // --- ATUALIZAï¿½ï¿½O DA DEAD ZONE(CAMERA) ---
+            float player_screen_x = player_x - camera_x + 16; // Posiï¿½ï¿½o X do centro da bola na tela
+            float player_screen_y = player_y - camera_y + 16; // Posiï¿½ï¿½o Y do centro da bola na tela
 
             // AJUSTA CAMERA_X
             if (player_screen_x < CAMERA_MARGIN_X) {
@@ -157,7 +176,7 @@ int main() {
                 camera_y = player_y - (ALTURA_TELA - CAMERA_MARGIN_Y) - 16; // MOVE PARA BAIXO
             }
 
-            // LIMITADOR PARA NÃO SAIR A CAMERA DA TERRA PLANA
+            // LIMITADOR PARA Nï¿½O SAIR A CAMERA DA TERRA PLANA
             if (camera_x < 0) camera_x = 0;
             if (camera_x > LARGURA_MAPA - LARGURA_TELA) camera_x = (float)(LARGURA_MAPA - LARGURA_TELA);
             if (camera_y < 0) camera_y = 0;
@@ -167,11 +186,19 @@ int main() {
 	           // --- MAPA EM PRETO ---
             al_clear_to_color(al_map_rgb(0, 0, 0)); // LIMPA A TELA EM PRETO
 
-	           // CHÃO DO MAPA
+	           // CHï¿½O DO MAPA
             al_draw_filled_rectangle(0 - camera_x, 0 - camera_y,
                                      LARGURA_MAPA - camera_x, ALTURA_MAPA - camera_y,
-                                     al_map_rgb(50, 50, 50)); // CINZA PARA O CHÃO
-
+                                     al_map_rgb(50, 50, 50)); // CINZA PARA O CHï¿½O
+	     int i;	
+	     for (int i = 0; i < NUM_OBSTACULOS; i++) {
+    al_draw_filled_rectangle(
+        obstaculos[i].x - camera_x,
+        obstaculos[i].y - camera_y,
+        obstaculos[i].x + obstaculos[i].caixalargura - camera_x,
+        obstaculos[i].y + obstaculos[i].caixaaltura - camera_y,
+        al_map_rgb(150, 0, 0)
+    );}
 	           // COR DO PERSONAGEM
             al_draw_filled_circle(player_x + 16 - camera_x, player_y + 16 - camera_y, 16, al_map_rgb(0, 255, 0)); // COR VERDE
 
@@ -179,8 +206,8 @@ int main() {
             float light_origin_x = player_x + 16;
             float light_origin_y = player_y + 16;
 
-        	   // CÁLCULO DA DIREÇÃO DA LANTERNA PARA O MOUSE
-	           // AJUSTAR ANTES LIGHT_ORIGIN NA POSIÇÃO E DEPOIS O CALCULO DELTA
+        	   // Cï¿½LCULO DA DIREï¿½ï¿½O DA LANTERNA PARA O MOUSE
+	           // AJUSTAR ANTES LIGHT_ORIGIN NA POSIï¿½ï¿½O E DEPOIS O CALCULO DELTA
             float delta_x_screen = mouse_x - (light_origin_x - camera_x);
             float delta_y_screen = mouse_y - (light_origin_y - camera_y);
             float base_angle = atan2f(delta_y_screen, delta_x_screen);
@@ -200,7 +227,7 @@ int main() {
             al_draw_filled_rectangle(0, 0, LARGURA_TELA, ALTURA_TELA, al_map_rgba(0, 0, 0, 200));
 
             	 // FAZ O CONE DE LUZ EM MODO BLEND ADITIVO
-	    	 // FUNCIONA COMO UMA SOMATORIA DAS CORES, SERVE PARA A LUZ MUDAR DO PRETO PARA A COR DO CHÃO OU OUTRO OBJETO
+	    	 // FUNCIONA COMO UMA SOMATORIA DAS CORES, SERVE PARA A LUZ MUDAR DO PRETO PARA A COR DO CHï¿½O OU OUTRO OBJETO
             al_set_blender(ALLEGRO_ADD, ALLEGRO_ALPHA, ALLEGRO_ONE);
             	 // MOSTRA O TRIANGULO DA LUZ AJUSTADO PELO BLEND ADITIVO
             al_draw_filled_triangle(light_origin_x - camera_x, light_origin_y - camera_y,
@@ -208,7 +235,7 @@ int main() {
                                     p3_x - camera_x, p3_y - camera_y,
                                     al_map_rgba(255, 255, 200, 100));
 
-            al_set_blender(ALLEGRO_ADD, ALLEGRO_ALPHA, ALLEGRO_INVERSE_ALPHA); // VOLTA COM O BLEND PADRÃO
+            al_set_blender(ALLEGRO_ADD, ALLEGRO_ALPHA, ALLEGRO_INVERSE_ALPHA); // VOLTA COM O BLEND PADRï¿½O
 
             al_flip_display();
             redraw = false;
