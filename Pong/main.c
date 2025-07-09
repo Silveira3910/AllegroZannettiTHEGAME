@@ -92,6 +92,21 @@ int main()
     float player_y = ALTURA_MAPA / 2.0f - 16;
     float player_speed = 3.0f;
 
+    obstaculos[0].x = player_x + 30;   // 30 pixels à direita
+    obstaculos[0].y = player_y + 30;   // 30 pixels abaixo
+    obstaculos[0].caixalargura = 100;
+    obstaculos[0].caixaaltura = 100;
+
+    obstaculos[1].x = player_x - 150;  // 150 pixels à esquerda
+    obstaculos[1].y = player_y;        // mesma altura do player
+    obstaculos[1].caixalargura = 50;
+    obstaculos[1].caixaaltura = 150;
+
+    obstaculos[2].x = player_x + 120;  // 120 pixels à direita
+    obstaculos[2].y = player_y - 100;  // 100 pixels acima
+    obstaculos[2].caixalargura = 120;
+    obstaculos[2].caixaaltura = 80;
+
     float light_length = 150.0f;
     float light_angle_spread = ALLEGRO_PI / 4.0f;
 
@@ -190,8 +205,8 @@ int main()
             al_draw_filled_rectangle(0 - camera_x, 0 - camera_y,
                                      LARGURA_MAPA - camera_x, ALTURA_MAPA - camera_y,
                                      al_map_rgb(50, 50, 50)); // CINZA PARA O CH�O
-	     int i;	
-	     for (int i = 0; i < NUM_OBSTACULOS; i++) {
+	     int i;
+	     for (i = 0; i < NUM_OBSTACULOS; i++) {
     al_draw_filled_rectangle(
         obstaculos[i].x - camera_x,
         obstaculos[i].y - camera_y,
@@ -248,3 +263,5 @@ int main()
 
     return 0;
 }
+
+// as colisões tão sendo desenhadas mas não tem um teste ainda ou um impedimento de movimentação tá 
