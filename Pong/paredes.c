@@ -2,6 +2,10 @@
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_primitives.h>
 
+
+const int NUM_OBSTACULOS = 10; // ou quantos você quiser
+OBSTACLE obstaculos[10];
+
 const char mapa[MAPA_LINHAS][MAPA_COLUNAS + 1] = {
     "################################################################################################################################################################",
     "#                                        #       #                   #       #                            #           #                                        #",

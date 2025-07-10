@@ -35,6 +35,11 @@ static bool game_over = false;
 static float opacidade_game_over = 0.0f;
 
 static Player player;
+static bool lanterna_ativa = false;
+static float tempo_lanterna = 0.0f;
+static const float DURACAO_LANTERNA = 12.0f;
+static float cooldown_lanterna = 0.0f;
+const float COOLDOWN_LANTERNA = 8.0f;
 
 void update_camera() {
     // Centraliza a câmera no jogador
@@ -50,7 +55,7 @@ void update_camera() {
         camera_y = ALTURA_MAPA - ALTURA_TELA;
 }
 
-void draw_lanterna() {
+void desenhar_feixes_visuais() {
     float light_origin_x = player.x + player.largura / 2.0f;
     float light_origin_y = player.y + player.altura / 2.0f;
 
@@ -60,24 +65,84 @@ void draw_lanterna() {
 
     float light_angle_spread = ALLEGRO_PI / 4.0f;
     float light_length = 150.0f;
+    int num_feixes = 200;
 
-    float angle1 = base_angle - light_angle_spread / 2.0f;
-    float angle2 = base_angle + light_angle_spread / 2.0f;
+    for (int i = 0; i <= num_feixes; i++) {
+        float angle = base_angle - light_angle_spread / 2.0f + (light_angle_spread / num_feixes) * i;
 
-    float p2_x = light_origin_x + light_length * cos(angle1);
-    float p2_y = light_origin_y + light_length * sin(angle1);
+        float end_x = light_origin_x;
+        float end_y = light_origin_y;
 
-    float p3_x = light_origin_x + light_length * cos(angle2);
-    float p3_y = light_origin_y + light_length * sin(angle2);
+        for (float dist = 0; dist < light_length; dist += 2.0f) {
+            float px = light_origin_x + dist * cosf(angle);
+            float py = light_origin_y + dist * sinf(angle);
 
+            if (paredes_colisao(px, py, 1, 1)) {
+                end_x = px;
+                end_y = py;
+                break;
+            }
+
+            end_x = px;
+            end_y = py;
+        }
+
+        // Aqui você desenha o feixe visual visível
+        al_draw_line(light_origin_x - camera_x, light_origin_y - camera_y,
+                     end_x - camera_x, end_y - camera_y,
+                     al_map_rgba(255, 255, 180, 30), 1);
+    }
+}
+
+void draw_lanterna() {
+    ALLEGRO_BITMAP *shadow = al_create_bitmap(LARGURA_TELA, ALTURA_TELA);
+    al_set_target_bitmap(shadow);
+    al_clear_to_color(al_map_rgba(0, 0, 0, 220));  // sombra escura
+
+    al_set_blender(ALLEGRO_DEST_MINUS_SRC, ALLEGRO_ALPHA, ALLEGRO_INVERSE_ALPHA);
+
+    float light_origin_x = player.x + player.largura / 2.0f;
+    float light_origin_y = player.y + player.altura / 2.0f;
+
+    float delta_x_screen = mouse_x - (light_origin_x - camera_x);
+    float delta_y_screen = mouse_y - (light_origin_y - camera_y);
+    float base_angle = atan2f(delta_y_screen, delta_x_screen);
+
+    float light_angle_spread = ALLEGRO_PI / 4.0f;
+    float light_length = 150.0f;
+    int num_feixes = 200;
+
+    for (int i = 0; i <= num_feixes; i++) {
+        float angle = base_angle - light_angle_spread / 2.0f + (light_angle_spread / num_feixes) * i;
+        float end_x = light_origin_x;
+        float end_y = light_origin_y;
+
+        for (float dist = 0; dist < light_length; dist += 2.0f) {
+            float px = light_origin_x + dist * cosf(angle);
+            float py = light_origin_y + dist * sinf(angle);
+
+            if (paredes_colisao(px, py, 1, 1)) {
+                end_x = px;
+                end_y = py;
+                break;
+            }
+
+            end_x = px;
+            end_y = py;
+        }
+
+        // Fura a sombra nesses pontos
+        al_draw_line(light_origin_x - camera_x, light_origin_y - camera_y,
+                     end_x - camera_x, end_y - camera_y,
+                     al_map_rgba(255, 255, 255, 255), 2);
+    }
+
+    // Restaura para desenhar na tela principal
+    al_set_target_backbuffer(al_get_current_display());
     al_set_blender(ALLEGRO_ADD, ALLEGRO_ALPHA, ALLEGRO_INVERSE_ALPHA);
-    al_draw_filled_rectangle(0, 0, LARGURA_TELA, ALTURA_TELA, al_map_rgba(0, 0, 0, 200));
-    al_set_blender(ALLEGRO_ADD, ALLEGRO_ALPHA, ALLEGRO_ONE);
-    al_draw_filled_triangle(light_origin_x - camera_x, light_origin_y - camera_y,
-                            p2_x - camera_x, p2_y - camera_y,
-                            p3_x - camera_x, p3_y - camera_y,
-                            al_map_rgba(255, 255, 200, 100));
-    al_set_blender(ALLEGRO_ADD, ALLEGRO_ALPHA, ALLEGRO_INVERSE_ALPHA);
+
+    al_draw_bitmap(shadow, 0, 0, 0);
+    al_destroy_bitmap(shadow);
 }
 
 void draw_game_over() {
@@ -176,6 +241,29 @@ void game_loop() {
                     if (fantasmas_check_collision(&player)) {
                         game_over = true;
                     }
+
+                    if (lanterna_ativa)
+                    {
+                        desenhar_feixes_visuais();
+                        tempo_lanterna -= 1.0f / FPS;
+                        if(tempo_lanterna <= 0.0f)
+                        {
+                            lanterna_ativa = false;
+                            tempo_lanterna = 0.0f;
+                            cooldown_lanterna = COOLDOWN_LANTERNA;
+                        }
+                    }
+                   else{
+                            if (cooldown_lanterna > 0.0f)
+                            {
+                                cooldown_lanterna -= 1.0f/FPS;
+                                if(cooldown_lanterna < 0.0f)
+                                {
+                                    cooldown_lanterna = 0.0f;
+                                }
+                            }
+                        }
+
                 }
                 break;
 
@@ -195,6 +283,12 @@ void game_loop() {
                         case ALLEGRO_KEY_LEFT: keys[KEY_LEFT] = true; break;
                         case ALLEGRO_KEY_RIGHT: keys[KEY_RIGHT] = true; break;
                         case ALLEGRO_KEY_ESCAPE: done = true; break;
+                        case ALLEGRO_KEY_F:
+                            if(!lanterna_ativa && cooldown_lanterna == 0.0f)
+                            {
+                                lanterna_ativa = true;
+                                tempo_lanterna = DURACAO_LANTERNA;
+                            }break;
                     }
                 } else {
                     if (ev.keyboard.keycode == ALLEGRO_KEY_R) {
@@ -231,8 +325,16 @@ void game_loop() {
             paredes_draw(camera_x, camera_y);
             player_draw(&player, camera_x, camera_y);
             fantasmas_draw(camera_x, camera_y);
+           if(lanterna_ativa)
+           {
+               desenhar_feixes_visuais();
+               draw_lanterna();
+           }else
+           {
+                 al_draw_filled_rectangle(0, 0, LARGURA_TELA, ALTURA_TELA, al_map_rgba(0, 0, 0, 220));
+        }
 
-            draw_lanterna();
+
 
             if (game_over) {
                 draw_game_over();
