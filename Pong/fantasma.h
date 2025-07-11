@@ -7,8 +7,8 @@
 typedef struct {
     float x, y;
     float dx, dy;
-    float tempo_direcao;
-    float tempo_exposto;
+    float tempo_direcao; // Tempo ate mudar de direcao
+    float tempo_exposto; // Tempo exposto a luz da lanterna
     bool ativo;
 } Fantasma;
 
