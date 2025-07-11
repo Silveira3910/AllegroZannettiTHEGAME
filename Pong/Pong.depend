@@ -483,7 +483,7 @@
 
 1362338300 c:\allegro\allegromingw\include\allegro5\allegro_image.h
 
-1752189691 source:c:\program files (x86)\codeblocks\projetos\pong\main.c
+1752190206 source:c:\program files (x86)\codeblocks\projetos\pong\main.c
 	<stdio.h>
 	<allegro5/allegro.h>
 	"game.h"
@@ -505,7 +505,7 @@
 	"allegro5/allegro.h"
 	"allegro5/allegro_audio.h"
 
-1752189691 source:c:\program files (x86)\codeblocks\projetos\pong\game.c
+1752191757 source:c:\program files (x86)\codeblocks\projetos\pong\game.c
 	"game.h"
 	"player.h"
 	"fantasma.h"
@@ -548,7 +548,7 @@
 	<stdbool.h>
 	"player.h"
 
-1752184539 source:c:\program files (x86)\codeblocks\projetos\pong\paredes.c
+1752190192 source:c:\program files (x86)\codeblocks\projetos\pong\paredes.c
 	"paredes.h"
 	"game.h"
 	"player.h"
@@ -556,11 +556,12 @@
 	<allegro5/allegro_primitives.h>
 	<stdio.h>
 
-1752184314 source:c:\program files (x86)\codeblocks\projetos\pong\fantasma.c
+1752191757 source:c:\program files (x86)\codeblocks\projetos\pong\fantasma.c
 	"fantasma.h"
 	"game.h"
 	"paredes.h"
 	<allegro5/allegro_primitives.h>
+	<allegro5/allegro_audio.h>
 	<stdlib.h>
 	<math.h>
 	<time.h>
@@ -624,7 +625,7 @@
 	<stdbool.h>
 	"player.h"
 
-1752184314 source:c:\program files (x86)\codeblocks\projetos\pong\item.c
+1752190361 source:c:\program files (x86)\codeblocks\projetos\pong\item.c
 	"item.h"
 	"game.h"
 	"paredes.h"
